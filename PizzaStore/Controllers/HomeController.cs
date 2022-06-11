@@ -22,8 +22,8 @@ namespace PizzaStore.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            IEnumerable<Pizza> employees = PizzaService.GetAll();
-            return Ok(employees);
+            IEnumerable<Pizza> pizzas = PizzaService.GetAll();
+            return Ok(pizzas);
         }
     }
 }
