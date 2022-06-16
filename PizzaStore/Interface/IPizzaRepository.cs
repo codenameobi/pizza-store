@@ -3,9 +3,10 @@ using PizzaStore.Models;
 
 namespace PizzaStore.Interface
 {
-    public interface IDataRepository
+    public interface IPizzaRepository
     {
         IEnumerable<Pizza> GetAll();
+        Pizza GetPizza(long id);
     }
 }
 

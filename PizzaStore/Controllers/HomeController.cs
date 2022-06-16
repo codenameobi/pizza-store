@@ -16,15 +16,87 @@ namespace PizzaStore.Controllers
     [Route("api/home")]
     public class HomeController : Controller
     {
-        
 
+        private readonly PizzaDb _context;
+
+        public HomeController(PizzaDb context)
+        {
+            _context = context;
+        }
         // GET: /<controller>/
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            IEnumerable<Pizza> pizzas = PizzaService.GetAll();
-            return Ok(pizzas);
+            //IEnumerable<Pizza> pizzas = PizzaService.GetAll();
+            return Ok(await _context.Pizzas.ToListAsync());
         }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Pizza>> GetPizza(long id)
+        {
+            var pizza = await _context.Pizzas.FirstOrDefaultAsync(m => m.Id == id);
+
+            if (pizza == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(pizza);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Pizza>> AddNewPizzaCreate(Pizza pizza)
+        {
+            _context.Pizzas.Add(pizza);
+            await _context.SaveChangesAsync();
+                   
+            return CreatedAtAction(nameof(GetPizza), new { id = pizza.Id, pizza });
+        }
+
+        [HttpPut("{id}")]
+        public  async Task<IActionResult> UpdatePizza(long id, Pizza pizza)
+        {
+            if (id != pizza.Id)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(pizza).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                //if (!TodoItemExists(id))
+                //{
+                //    return NotFound();
+                //}
+                //else
+                //{
+                //    throw;
+                //}
+            }
+            return Ok();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult>  DeletePizza(long id)
+        {
+            var pizza = await _context.Pizzas.FindAsync(id);
+            if (pizza == null)
+            {
+                return NotFound();
+            }
+
+            _context.Pizzas.Remove(pizza);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+
     }
 }
 
