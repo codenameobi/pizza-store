@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore;
 using PizzaStore.Data;
 using PizzaStore.Interface;
 using PizzaStore.Models;
@@ -46,15 +47,24 @@ namespace PizzaStore.Service
 
         public void Remove(int id)
         {
-            //var pizza = _context.Pizzas.FindAsync(id);
-            //_context.Pizzas.Remove(pizza);
-            //_context.SaveChangesAsync();
-            throw new NotImplementedException();
+            var pizza = _context.Pizzas.Find(id);
+            _context.Pizzas.Remove(pizza);
+            _context.SaveChangesAsync();
         }
 
         public bool Update(Pizza pizza)
         {
-            throw new NotImplementedException();
+            _context.Entry(pizza).State = EntityState.Modified;
+
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch
+            {
+               throw new NotImplementedException();
+            }
+            return true;
         }
     }
 }
