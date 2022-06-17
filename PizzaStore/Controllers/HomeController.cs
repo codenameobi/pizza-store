@@ -16,25 +16,24 @@ namespace PizzaStore.Controllers
     [Route("api/home")]
     public class HomeController : Controller
     {
+        private readonly IPizzaRepository _pizzaService;
 
-        private readonly PizzaDb _context;
-
-        public HomeController(PizzaDb context)
+        public HomeController(IPizzaRepository service)
         {
-            _context = context;
+            _pizzaService = service;
         }
         // GET: /<controller>/
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public  IActionResult Index()
         {
-            //IEnumerable<Pizza> pizzas = PizzaService.GetAll();
-            return Ok(await _context.Pizzas.ToListAsync());
+            IEnumerable<Pizza> pizzas = _pizzaService.GetAll();
+            return Ok(pizzas);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Pizza>> GetPizza(long id)
+        public ActionResult<Pizza> GetPizza(long id)
         {
-            var pizza = await _context.Pizzas.FirstOrDefaultAsync(m => m.Id == id);
+            var pizza = _pizzaService.GetPizza(id);
 
             if (pizza == null)
             {
@@ -44,57 +43,69 @@ namespace PizzaStore.Controllers
             return Ok(pizza);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<Pizza>> AddNewPizzaCreate(Pizza pizza)
+        [Route("pizzabyname")]
+        [HttpGet]
+        public ActionResult<Pizza> GetPizzaByName(string name)
         {
-            _context.Pizzas.Add(pizza);
-            await _context.SaveChangesAsync();
-                   
-            return CreatedAtAction(nameof(GetPizza), new { id = pizza.Id, pizza });
-        }
+            IEnumerable<Pizza> pizzas = _pizzaService.GetAllPizzaByName(name);
 
-        [HttpPut("{id}")]
-        public  async Task<IActionResult> UpdatePizza(long id, Pizza pizza)
-        {
-            if (id != pizza.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(pizza).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                //if (!TodoItemExists(id))
-                //{
-                //    return NotFound();
-                //}
-                //else
-                //{
-                //    throw;
-                //}
-            }
-            return Ok();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult>  DeletePizza(long id)
-        {
-            var pizza = await _context.Pizzas.FindAsync(id);
-            if (pizza == null)
+            if(pizzas == null)
             {
                 return NotFound();
             }
 
-            _context.Pizzas.Remove(pizza);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return Ok(pizzas);
         }
+
+        [HttpPost]
+        public ActionResult<Pizza> AddNewPizzaCreate(Pizza pizza)
+        {
+            _pizzaService.AddNewPizza(pizza);
+            return CreatedAtAction(nameof(GetPizza), new { id = pizza.Id, pizza });
+        }
+
+        //[HttpPut("{id}")]
+        //public  async Task<IActionResult> UpdatePizza(long id, Pizza pizza)
+        //{
+        //    if (id != pizza.Id)
+        //    {
+        //        return BadRequest();
+        //    }
+
+        //    _context.Entry(pizza).State = EntityState.Modified;
+
+        //    try
+        //    {
+        //        await _context.SaveChangesAsync();
+        //    }
+        //    catch (DbUpdateConcurrencyException)
+        //    {
+        //        //if (!TodoItemExists(id))
+        //        //{
+        //        //    return NotFound();
+        //        //}
+        //        //else
+        //        //{
+        //        //    throw;
+        //        //}
+        //    }
+        //    return Ok();
+        //}
+
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult>  DeletePizza(long id)
+        //{
+        //    var pizza = await _context.Pizzas.FindAsync(id);
+        //    if (pizza == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    _context.Pizzas.Remove(pizza);
+        //    await _context.SaveChangesAsync();
+
+        //    return NoContent();
+        //}
 
 
     }
